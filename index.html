@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Multi Utility Studio</title>
+
+<style>
+body{
+
+font-family:Arial;
+margin:0;
+background:#f6f8fc;
+
+}
+
+.navbar{
+
+display:flex;
+justify-content:space-between;
+padding:15px 40px;
+background:white;
+border-bottom:1px solid #ddd;
+
+}
+
+.navbar ul{
+
+display:flex;
+gap:20px;
+list-style:none;
+
+}
+
+.logo{
+
+font-weight:bold;
+font-size:20px;
+
+}
+
+.hero{
+
+text-align:center;
+margin-top:40px;
+
+}
+
+.upload-box{
+
+width:600px;
+height:200px;
+margin:40px auto;
+background:#6d8edb;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+color:white;
+
+}
+
+.upload-box button{
+
+padding:10px 20px;
+border:none;
+background:white;
+color:black;
+border-radius:5px;
+cursor:pointer;
+
+}
+
+.editor{
+
+text-align:center;
+margin-top:20px;
+
+}
+
+.editor input{
+
+margin:5px;
+padding:5px;
+
+}
+
+.editor button{
+
+background:#2563eb;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:5px;
+cursor:pointer;
+
+}
+
+#downloadBtn{
+
+background:green;
+color:white;
+padding:10px 20px;
+margin-left:10px;
+text-decoration:none;
+border-radius:5px;
+
+}
+
+canvas{
+
+display:block;
+margin:20px auto;
+max-width:80%;
+
+}
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+<div class="logo">Multi Utility Studio</div>
+
+<ul>
+
+<li>Resize</li>
+<li>Crop</li>
+<li>Compress</li>
+<li>Convert</li>
+
+</ul>
+
+</nav>
+
+<section class="hero">
+
+<h1>Image Resizer</h1>
+
+<p>Easily resize images online for free.</p>
+
+</section>
+
+<div class="upload-box" id="dropArea">
+
+<input type="file" id="imageInput" hidden>
+
+<button onclick="document.getElementById('imageInput').click()">
+
+Select Images
+
+</button>
+
+<p>or drag and drop images here</p>
+
+</div>
+
+<div class="editor">
+
+<label>Width (px)</label>
+<input type="number" id="width">
+
+<label>Height (px)</label>
+<input type="number" id="height">
+
+<label>Compression</label>
+<input type="number" id="quality" step="0.1" value="0.8">
+
+<button onclick="processImage()">Resize Image</button>
+
+<a id="downloadBtn" download="image.jpg">Download</a>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const input = document.getElementById("imageInput")
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+
+let img = new Image()
+
+input.addEventListener("change", function(){
+
+const file = input.files[0]
+
+img.src = URL.createObjectURL(file)
+
+img.onload = function(){
+
+document.getElementById("width").value = img.width
+document.getElementById("height").value = img.height
+
+canvas.width = img.width
+canvas.height = img.height
+
+ctx.drawImage(img,0,0)
+
+}
+
+})
+
+function applyPreset(){
+
+const preset = document.getElementById("preset").value
+
+if(preset){
+
+const size = preset.split("x")
+
+document.getElementById("width").value = size[0]
+document.getElementById("height").value = size[1]
+
+}
+
+}
+
+function processImage(){
+
+const width = document.getElementById("width").value
+const height = document.getElementById("height").value
+const quality = document.getElementById("quality").value
+
+const file = input.files[0]
+
+const formData = new FormData()
+formData.append("image", file)
+formData.append("width", width)
+formData.append("height", height)
+formData.append("quality", quality)
+
+fetch("/resize", {
+method:"POST",
+body:formData
+})
+.then(res => res.blob())
+.then(blob => {
+
+const url = URL.createObjectURL(blob)
+document.getElementById("downloadBtn").href = url
+
+})
+
+}
+
+</script>
+
+</body>
+
+</html>
